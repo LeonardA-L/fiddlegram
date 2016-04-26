@@ -1,24 +1,74 @@
+var childProcess = require("child_process");
+// (function() {
+//     var oldSpawn = childProcess.spawn;
+//     function mySpawn() {
+//         console.log('spawn called');
+//         console.log(arguments);
+//         var result = oldSpawn.apply(this, arguments);
+//         return result;
+//     }
+//     childProcess.spawn = mySpawn;
+// })();
+var spawn = childProcess.spawn;
 var TelegramBot = require('node-telegram-bot-api');
 var token = require('./token').token;
 console.log(token);
+
 // Setup polling way
 var bot = new TelegramBot(token, {polling: true});
+var envs = {};
 
 // Matches /echo [whatever]
-bot.onText(/\/echo (.+)/, function (msg, match) {
-  var fromId = msg.from.id;
-  var resp = match[1];
-  bot.sendMessage(fromId, resp);
-});
+function start(msg) {
+  console.log('Spawning');
+  var js = spawn('./process.sh', []);
+
+  js.stdout.on('data', function (data) {
+      console.log(data.toString());
+      bot.sendMessage(msg.from.id, data.toString());
+  });
+
+  js.stderr.on('data', function (data) {
+    console.log('stderr: '+data);
+  });
+
+  js.on('close', function (code) {
+    console.log('child process exited with code '+code);
+  });
+
+  envs[msg.from.id] = js;
+
+  bot.sendMessage(msg.from.id, 'Loaded up and looking fine');
+};
+
+function stop(id) {
+  var env = envs[id];
+  env.stdin.removeAllListeners('data')
+  env.kill('SIGKILL');
+  delete envs[id];
+}
 
 // Any kind of message
 bot.on('message', function (msg) {
   var chatId = msg.chat.id;
   console.log(msg);
-  bot.sendMessage(msg.from.id, 'Lol you wrote '+msg.text);
-  // photo can be: a file path, a stream or a Telegram file_id
-  //var photo = 'cats.png';
-  //bot.sendPhoto(chatId, photo, {caption: 'Lovely kittens'});
+  var env = envs[msg.from.id];
+  if(msg.text === '/start') {
+    if(env){
+      return bot.sendMessage(msg.from.id, 'You already have a shell running. Run /stop to stop it');
+    }
+    start(msg);
+  }
+  else if(msg.text === '/stop') {
+    stop(msg.from.id);
+    bot.sendMessage(msg.from.id, 'Env killed');
+  }
+  else if(env) {
+    env.stdin.write(msg.text+'\n');
+  }
+  else {
+    bot.sendMessage(msg.from.id, 'You don\'t have any env running');
+  }
 });
 
 bot.on('inline_query', function (msg) {
