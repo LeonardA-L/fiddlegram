@@ -30,10 +30,13 @@ function start(msg) {
 
   js.stderr.on('data', function (data) {
     console.log('stderr: '+data);
+    bot.sendMessage(msg.from.id, 'Err: '+data.toString());
   });
 
   js.on('close', function (code) {
     console.log('child process exited with code '+code);
+    bot.sendMessage(msg.from.id, 'Env killed');
+    stop(msg.from.id);
   });
 
   envs[msg.from.id] = js;
@@ -51,7 +54,7 @@ function stop(id) {
 // Any kind of message
 bot.on('message', function (msg) {
   var chatId = msg.chat.id;
-  console.log(msg);
+  //console.log(msg);
   var env = envs[msg.from.id];
   if(msg.text === '/start') {
     if(env){
@@ -61,9 +64,9 @@ bot.on('message', function (msg) {
   }
   else if(msg.text === '/stop') {
     stop(msg.from.id);
-    bot.sendMessage(msg.from.id, 'Env killed');
   }
   else if(env) {
+    console.log('Writing '+msg.text+' to env');
     env.stdin.write(msg.text+'\n');
   }
   else {
