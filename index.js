@@ -1,4 +1,5 @@
 var childProcess = require("child_process");
+var pty = require("pty");
 // (function() {
 //     var oldSpawn = childProcess.spawn;
 //     function mySpawn() {
@@ -21,7 +22,7 @@ var envs = {};
 // Matches /echo [whatever]
 function start(msg) {
   console.log('Spawning');
-  var js = spawn('./process.sh', []);
+  var js = pty.spawn('./process.sh', []);
 
   js.stdout.on('data', function (data) {
       console.log(data.toString());
