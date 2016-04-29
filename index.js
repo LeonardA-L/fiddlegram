@@ -24,29 +24,31 @@ function start(msg) {
   console.log('Spawning');
   var js = pty.spawn('./process.sh', []);
 
+
   js.stdout.on('data', function (data) {
       console.log(data.toString());
       bot.sendMessage(msg.from.id, data.toString());
   });
-
+/*
   js.stderr.on('data', function (data) {
     console.log('stderr: '+data);
     bot.sendMessage(msg.from.id, 'Err: '+data.toString());
   });
-
+*/
   js.on('close', function (code) {
     console.log('child process exited with code '+code);
     bot.sendMessage(msg.from.id, 'Env killed');
     stop(msg.from.id);
   });
 
-  envs[msg.from.id] = js;
+  envs[msg.from.id.toString()] = js;
+  console.log(msg.from.id);
 
   bot.sendMessage(msg.from.id, 'Loaded up and looking fine');
 };
 
 function stop(id) {
-  var env = envs[id];
+  var env = envs[id.toString()];
   env.stdin.removeAllListeners('data')
   env.kill('SIGKILL');
   delete envs[id];
@@ -56,7 +58,7 @@ function stop(id) {
 bot.on('message', function (msg) {
   var chatId = msg.chat.id;
   //console.log(msg);
-  var env = envs[msg.from.id];
+  var env = envs[msg.from.id.toString()];
   if(msg.text === '/start') {
     if(env){
       return bot.sendMessage(msg.from.id, 'You already have a shell running. Run /stop to stop it');
@@ -64,6 +66,7 @@ bot.on('message', function (msg) {
     start(msg);
   }
   else if(msg.text === '/stop') {
+  console.log(msg.from.id);
     stop(msg.from.id);
   }
   else if(env) {
