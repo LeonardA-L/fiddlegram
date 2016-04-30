@@ -12,6 +12,8 @@ var shellSettings = {
     command: ['run', '--name', '', '-it', 'dphp', 'php', '-a']
   }
 };
+var killInactiveDelay = 20 * 1000; //ms
+var inactiveThreshold = 5 * 60;    //s
 var envs = {};
 
 // Create bot
@@ -81,6 +83,7 @@ bot.on('message', function (msg) {
     stop(env);
   }
   else if(env) {
+    env.lastActive = new Date();
     env.env.stdin.write(msg.text+'\n');
   }
   else {
@@ -93,6 +96,20 @@ bot.on('message', function (msg) {
 	bot.answerInlineQuery(msg.id, [{type:'text', text:'haha'}]);
 });
 */
+
+setInterval(function(){
+  //console.log('Killing inactive envs');
+  var now = new Date();
+  for(var i in envs){
+    var e = envs[i];
+    var dateDiff = (now - e.lastActive) / 1000;
+    if(dateDiff > inactiveThreshold){
+      //console.log('Killing inactive env '+i);
+      bot.sendMessage(i, 'Your console session has been inactive for '+inactiveThreshold/60+' minutes and has been killed');
+      stop(e);
+    }
+  }
+}, killInactiveDelay);
 
 killAndRemove(null);
 console.log('Bot is up and running');
