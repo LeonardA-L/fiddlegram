@@ -1,4 +1,4 @@
-var childProcess = require("child_process");
+var child_process = require("child_process");
 var pty = require("pty");
 // (function() {
 //     var oldSpawn = childProcess.spawn;
@@ -10,14 +10,14 @@ var pty = require("pty");
 //     }
 //     childProcess.spawn = mySpawn;
 // })();
-var spawn = childProcess.spawn;
+var spawn = child_process.spawn;
 var TelegramBot = require('node-telegram-bot-api');
 var token = require('./token').token;
 console.log(token);
 
 var shellSettings = {
   php:{
-    command: ['run', '-it', 'dphp', 'php', '-a']
+    command: ['run', '--name', '', '-it', 'dphp', 'php', '-a']
   }
 };
 
@@ -25,9 +25,15 @@ var shellSettings = {
 var bot = new TelegramBot(token, {polling: true});
 var envs = {};
 
+child_process.exec('docker kill $(docker ps -a -q)');
+child_process.exec('docker rm $(docker ps -a -q)');
+
 function createEnv(id, type) {
   id = id.toString();
-  var env = pty.spawn('docker', shellSettings[type].command);
+  var command = shellSettings[type].command.slice();
+  command[2] = 'env'+id;
+  console.log(command);
+  var env = pty.spawn('docker', command);
   console.log(env.pid);
   env.stdout.on('data', function (data) {
       console.log(env.pid);
@@ -45,7 +51,8 @@ function createEnv(id, type) {
     type: type,
     env: env,
     started: new Date(),
-    lastActive: new Date()
+    lastActive: new Date(),
+    pid: env.pid
   };
 }
 
@@ -60,16 +67,19 @@ function start(msg) {
 };
 
 function stop(env) {
-  env.env.stdin.removeAllListeners('data')
-  env.env.kill('SIGKILL');
+  child_process.exec('docker kill env'+env.id);
+  child_process.exec('docker rm env'+env.id);
   delete envs[env.id];
 }
 
 // Any kind of message
 bot.on('message', function (msg) {
   var chatId = msg.chat.id;
+  /*bot.sendMessage(msg.from.id, 'ok');
+  return;*/
   //console.log(msg);
   var env = envs[msg.from.id.toString()];
+  console.log(msg.text);
   if(msg.text === '/start') {
     if(env){
       return bot.sendMessage(msg.from.id, 'You already have a shell running. Run /stop to stop it');
@@ -82,7 +92,7 @@ bot.on('message', function (msg) {
   }
   else if(env) {
     console.log('Writing '+msg.text+' to env');
-    env.stdin.write(msg.text+'\n');
+    env.env.stdin.write(msg.text+'\n');
   }
   else {
     bot.sendMessage(msg.from.id, 'You don\'t have any env running');
