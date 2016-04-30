@@ -1,32 +1,23 @@
+// Module required
 var child_process = require("child_process");
 var pty = require("pty");
 var async = require("async");
-// (function() {
-//     var oldSpawn = childProcess.spawn;
-//     function mySpawn() {
-//         console.log('spawn called');
-//         console.log(arguments);
-//         var result = oldSpawn.apply(this, arguments);
-//         return result;
-//     }
-//     childProcess.spawn = mySpawn;
-// })();
-var spawn = child_process.spawn;
 var TelegramBot = require('node-telegram-bot-api');
-var token = require('./token').token;
-console.log(token);
 
+var token = require('./token').token;
+
+// Init stuff
 var shellSettings = {
   php:{
     command: ['run', '--name', '', '-it', 'dphp', 'php', '-a']
   }
 };
-
-// Setup polling way
-var bot = new TelegramBot(token, {polling: true});
 var envs = {};
 
-function killAndRemove(container, callback) {
+// Create bot
+var bot = new TelegramBot(token, {polling: true});
+
+function killAndRemove(container) {
   container = container || '$(docker ps -a -q)';
   child_process.exec('docker kill '+container);
   child_process.exec('docker rm '+container);
@@ -36,11 +27,8 @@ function createEnv(id, type) {
   id = id.toString();
   var command = shellSettings[type].command.slice();
   command[2] = 'env'+id;
-  console.log(command);
   var env = pty.spawn('docker', command);
-  console.log(env.pid);
   env.stdout.on('data', function (data) {
-      console.log(env.pid);
       bot.sendMessage(id, data.toString());
   });
 
@@ -81,7 +69,6 @@ bot.on('message', function (msg) {
   var chatId = msg.chat.id;
   /*bot.sendMessage(msg.from.id, 'ok');
   return;*/
-  //console.log(msg);
   var env = envs[msg.from.id.toString()];
   console.log(msg.text);
   if(msg.text === '/start') {
@@ -91,11 +78,9 @@ bot.on('message', function (msg) {
     start(msg);
   }
   else if(msg.text === '/stop') {
-  console.log(msg.from.id);
     stop(env);
   }
   else if(env) {
-    console.log('Writing '+msg.text+' to env');
     env.env.stdin.write(msg.text+'\n');
   }
   else {
@@ -103,10 +88,11 @@ bot.on('message', function (msg) {
   }
 });
 
-bot.on('inline_query', function (msg) {
+/*bot.on('inline_query', function (msg) {
 	console.log(msg);
 	bot.answerInlineQuery(msg.id, [{type:'text', text:'haha'}]);
 });
+*/
 
 killAndRemove(null);
-console.log('Bot is up');
+console.log('Bot is up and running');
