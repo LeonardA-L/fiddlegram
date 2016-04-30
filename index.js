@@ -1,5 +1,6 @@
 var child_process = require("child_process");
 var pty = require("pty");
+var async = require("async");
 // (function() {
 //     var oldSpawn = childProcess.spawn;
 //     function mySpawn() {
@@ -25,8 +26,11 @@ var shellSettings = {
 var bot = new TelegramBot(token, {polling: true});
 var envs = {};
 
-child_process.exec('docker kill $(docker ps -a -q)');
-child_process.exec('docker rm $(docker ps -a -q)');
+function killAndRemove(container, callback) {
+  container = container || '$(docker ps -a -q)';
+  child_process.exec('docker kill '+container);
+  child_process.exec('docker rm '+container);
+}
 
 function createEnv(id, type) {
   id = id.toString();
@@ -61,14 +65,14 @@ function start(msg) {
   console.log('Spawning');
   var type = 'php'; // TODO
  
+  killAndRemove('env'+msg.from.id.toString());
   createEnv(msg.from.id, type);
-
   bot.sendMessage(msg.from.id, 'Loaded up and looking fine');
+
 };
 
 function stop(env) {
-  child_process.exec('docker kill env'+env.id);
-  child_process.exec('docker rm env'+env.id);
+  killAndRemove('env'+env.id);
   delete envs[env.id];
 }
 
@@ -95,7 +99,7 @@ bot.on('message', function (msg) {
     env.env.stdin.write(msg.text+'\n');
   }
   else {
-    bot.sendMessage(msg.from.id, 'You don\'t have any env running');
+    bot.sendMessage(msg.from.id, 'You don\'t have any env running. Run /start to start one');
   }
 });
 
@@ -103,3 +107,6 @@ bot.on('inline_query', function (msg) {
 	console.log(msg);
 	bot.answerInlineQuery(msg.id, [{type:'text', text:'haha'}]);
 });
+
+killAndRemove(null);
+console.log('Bot is up');
