@@ -17,7 +17,7 @@ console.log(token);
 
 var shellSettings = {
   php:{
-    command: ['run', '-it', 'dphp', 'php', '-a'];
+    command: ['run', '-it', 'dphp', 'php', '-a']
   }
 };
 
@@ -25,41 +25,44 @@ var shellSettings = {
 var bot = new TelegramBot(token, {polling: true});
 var envs = {};
 
+function createEnv(id, type) {
+  id = id.toString();
+  var env = pty.spawn('docker', shellSettings[type].command);
+  console.log(env.pid);
+  env.stdout.on('data', function (data) {
+      console.log(env.pid);
+      bot.sendMessage(id, data.toString());
+  });
+
+  env.on('close', function (code) {
+    console.log('child process exited with code '+code);
+    bot.sendMessage(id, 'Env killed');
+    stop(env);
+  });
+
+  envs[id] = {
+    id: id,
+    type: type,
+    env: env,
+    started: new Date(),
+    lastActive: new Date()
+  };
+}
+
 // Matches /echo [whatever]
 function start(msg) {
   console.log('Spawning');
   var type = 'php'; // TODO
-  //var js = pty.spawn('./process.sh', []);
-  var js = pty.spawn('docker', shellSettings[type].command);
-
-
-  js.stdout.on('data', function (data) {
-      console.log(data.toString());
-      bot.sendMessage(msg.from.id, data.toString());
-  });
-/*
-  js.stderr.on('data', function (data) {
-    console.log('stderr: '+data);
-    bot.sendMessage(msg.from.id, 'Err: '+data.toString());
-  });
-*/
-  js.on('close', function (code) {
-    console.log('child process exited with code '+code);
-    bot.sendMessage(msg.from.id, 'Env killed');
-    stop(msg.from.id);
-  });
-
-  envs[msg.from.id.toString()] = js;
-  console.log(msg.from.id);
+ 
+  createEnv(msg.from.id, type);
 
   bot.sendMessage(msg.from.id, 'Loaded up and looking fine');
 };
 
-function stop(id) {
-  var env = envs[id.toString()];
-  env.stdin.removeAllListeners('data')
-  env.kill('SIGKILL');
-  delete envs[id];
+function stop(env) {
+  env.env.stdin.removeAllListeners('data')
+  env.env.kill('SIGKILL');
+  delete envs[env.id];
 }
 
 // Any kind of message
@@ -75,7 +78,7 @@ bot.on('message', function (msg) {
   }
   else if(msg.text === '/stop') {
   console.log(msg.from.id);
-    stop(msg.from.id);
+    stop(env);
   }
   else if(env) {
     console.log('Writing '+msg.text+' to env');
