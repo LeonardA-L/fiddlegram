@@ -6,16 +6,19 @@ sudo apt-get upgrade -y
 # Install required packages
 sudo apt-get install npm curl -y
 
-sudo npm install -g npm
+sudo npm install -g node npm
+
+sudo rm -f /usr/bin/node
 sudo ln -s /usr/bin/nodejs /usr/bin/node
 
-# Install shells
-sudo apt-get install php5-cli -y
-
 cd /vagrant
-npm install
+npm install --no-bin-links
 
 # Docker
 curl -fsSL https://get.docker.com/ | sh
 sudo usermod -aG docker vagrant
 
+cd dockerImages/phpImage/
+docker build -t dphp .
+
+cd /vagrant

@@ -15,6 +15,12 @@ var TelegramBot = require('node-telegram-bot-api');
 var token = require('./token').token;
 console.log(token);
 
+var shellSettings = {
+  php:{
+    command: ['run', '-it', 'dphp', 'php', '-a'];
+  }
+};
+
 // Setup polling way
 var bot = new TelegramBot(token, {polling: true});
 var envs = {};
@@ -22,7 +28,9 @@ var envs = {};
 // Matches /echo [whatever]
 function start(msg) {
   console.log('Spawning');
-  var js = pty.spawn('./process.sh', []);
+  var type = 'php'; // TODO
+  //var js = pty.spawn('./process.sh', []);
+  var js = pty.spawn('docker', shellSettings[type].command);
 
 
   js.stdout.on('data', function (data) {

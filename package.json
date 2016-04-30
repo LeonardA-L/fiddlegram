@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/LeonardA-L/fantastic-octo-barnacle#readme",
   "dependencies": {
-    "node-telegram-bot-api": "^0.21.1"
+    "node-telegram-bot-api": "^0.21.1",
+    "pty": "0.0.0"
   }
 }
