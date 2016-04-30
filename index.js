@@ -31,10 +31,25 @@ var envs = {};
 // Create bot
 var bot = new TelegramBot(token, {polling: true});
 
-function killAndRemove(container) {
+function killAndRemove(container, callback) {
   container = container || '$(docker ps -a -q)';
-  child_process.exec('docker kill '+container);
-  child_process.exec('docker rm '+container);
+  async.series([
+    function (next){
+      child_process.exec('docker kill '+container, function(){
+        next();
+      });
+
+    },
+    function (next){
+      child_process.exec('docker rm '+container, function(){
+        next();
+      });
+    }
+  ], function(){
+    if(callback){
+      callback();
+    }
+  });
 }
 
 function createEnv(id, type) {
@@ -74,9 +89,16 @@ function start(msg) {
     }
   }
 
-  killAndRemove('env'+msg.from.id.toString());
-  createEnv(msg.from.id, type);
-  bot.sendMessage(msg.from.id, 'Loaded up and looking fine');
+  async.series([
+    function (next){
+      killAndRemove('env'+msg.from.id.toString(), next);
+    },
+    function (next) {
+      createEnv(msg.from.id, type);
+      bot.sendMessage(msg.from.id, 'Loaded up and looking fine');
+      next();
+    }
+  ]);
 
 };
 
@@ -130,5 +152,5 @@ setInterval(function(){
   }
 }, killInactiveDelay);
 
-killAndRemove(null);
+killAndRemove();
 console.log('Bot is up and running');
