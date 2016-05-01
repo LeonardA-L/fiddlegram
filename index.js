@@ -10,6 +10,9 @@ var token = require('./token').token;
 var shellSettings = {
   php:{
     command: ['run', '--name', '', '-it', 'dphp', 'php', '-a']
+  },
+  python:{
+    command: ['run', '--name', '', '-it', 'dpython', 'python']
   }
 };
 var killInactiveDelay = 20 * 1000; //ms

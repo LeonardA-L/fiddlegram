@@ -5,6 +5,8 @@ docker
 	docker run img php -a
 custom js shell
 command suffixes (; for php)
+don't replay last message
+don't send shell line
 Faire un token.js de démo
 wording
 
