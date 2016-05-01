@@ -16,6 +16,9 @@ var shellSettings = {
   },
   python3:{
     command: ['run', '--name', '', '-it', 'dpython3', 'python3']
+  },
+  erlang:{
+    command: ['run', '--name', '', '-it', 'derlang', 'erl']
   }
 };
 shellSettings.python2 = shellSettings.python;
@@ -61,7 +64,7 @@ function createEnv(id, type) {
 // Matches /echo [whatever]
 function start(msg) {
   console.log('Spawning');
-  var type = 'python3'; // TODO
+  var type = 'erlang'; // TODO
  
   killAndRemove('env'+msg.from.id.toString());
   createEnv(msg.from.id, type);
@@ -83,7 +86,7 @@ bot.on('message', function (msg) {
   console.log(msg.text);
   if(msg.text === '/start') {
     if(env){
-      return bot.sendMessage(msg.from.id, 'You already have a shell running. Run /stop to stop it');
+      return bot.sendMessage(msg.from.id, 'You already have a shell running. Run /stop to stop it.');
     }
     start(msg);
   }
@@ -95,7 +98,7 @@ bot.on('message', function (msg) {
     env.env.stdin.write(msg.text+'\n');
   }
   else {
-    bot.sendMessage(msg.from.id, 'You don\'t have any env running. Run /start to start one');
+    bot.sendMessage(msg.from.id, 'You don\'t have any env running. Run /start to start one, or /help to get help.');
   }
 });
 

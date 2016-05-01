@@ -7,6 +7,8 @@ custom js shell
 command suffixes (; for php)
 don't replay last message
 don't send shell line
+RAM limit
+CPU limit
 Faire un token.js de démo
 wording
 
