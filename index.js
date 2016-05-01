@@ -25,6 +25,7 @@ shellSettings.python2 = shellSettings.python;
 
 var killInactiveDelay = 20 * 1000; //ms
 var inactiveThreshold = 5 * 60;    //s
+var defaultLanguage = 'python';
 var envs = {};
 
 // Create bot
@@ -64,8 +65,15 @@ function createEnv(id, type) {
 // Matches /echo [whatever]
 function start(msg) {
   console.log('Spawning');
-  var type = 'erlang'; // TODO
- 
+  var type = defaultLanguage;
+
+  if(msg.text.split(' ').length > 1){
+    type = msg.text.split(' ')[1];
+    if(!shellSettings.hasOwnProperty(type)){
+      return bot.sendMessage(msg.from.id, 'The language '+type+' is not supported. Type /languages for a list of supported languages.');
+    }
+  }
+
   killAndRemove('env'+msg.from.id.toString());
   createEnv(msg.from.id, type);
   bot.sendMessage(msg.from.id, 'Loaded up and looking fine');
@@ -84,7 +92,7 @@ bot.on('message', function (msg) {
   return;*/
   var env = envs[msg.from.id.toString()];
   console.log(msg.text);
-  if(msg.text === '/start') {
+  if(msg.text.match('/start\s?.*')) {
     if(env){
       return bot.sendMessage(msg.from.id, 'You already have a shell running. Run /stop to stop it.');
     }
