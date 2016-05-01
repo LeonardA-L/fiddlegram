@@ -13,8 +13,13 @@ var shellSettings = {
   },
   python:{
     command: ['run', '--name', '', '-it', 'dpython', 'python']
+  },
+  python3:{
+    command: ['run', '--name', '', '-it', 'dpython3', 'python3']
   }
 };
+shellSettings.python2 = shellSettings.python;
+
 var killInactiveDelay = 20 * 1000; //ms
 var inactiveThreshold = 5 * 60;    //s
 var envs = {};
@@ -56,7 +61,7 @@ function createEnv(id, type) {
 // Matches /echo [whatever]
 function start(msg) {
   console.log('Spawning');
-  var type = 'php'; // TODO
+  var type = 'python3'; // TODO
  
   killAndRemove('env'+msg.from.id.toString());
   createEnv(msg.from.id, type);

@@ -20,5 +20,9 @@ sudo usermod -aG docker vagrant
 
 cd dockerImages/phpImage/
 docker build -t dphp .
+cd dockerImages/pythonImage/
+docker build -t dpython .
+cd dockerImages/python3Image/
+docker build -t dpython3 .
 
 cd /vagrant
