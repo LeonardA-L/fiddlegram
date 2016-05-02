@@ -22,9 +22,13 @@ var shellSettings = {
   },
   haskell:{
     command: ['run', '--name', '', '-it', 'dhaskell', 'ghci']
+  },
+  javascript:{
+    command: ['run', '--name', '', '-it', 'djs', 'js24']
   }
 };
 shellSettings.python2 = shellSettings.python;
+shellSettings.js = shellSettings.javascript;
 
 var killInactiveDelay = 20 * 1000; //ms
 var inactiveThreshold = 5 * 60;    //s
@@ -86,7 +90,7 @@ function start(msg) {
   var type = defaultLanguage;
 
   if(msg.text.split(' ').length > 1){
-    type = msg.text.split(' ')[1];
+    type = msg.text.split(' ')[1].toLowerCase();
     if(!shellSettings.hasOwnProperty(type)){
       return bot.sendMessage(msg.from.id, 'The language '+type+' is not supported. Type /languages for a list of supported languages.');
     }
