@@ -9,7 +9,8 @@ var token = require('./token').token;
 // Init stuff
 var shellSettings = {
   php:{
-    command: ['run', '--name', '', '-it', 'dphp', 'php', '-a']
+    command: ['run', '--name', '', '-it', 'dphp', 'php', '-a'],
+    suffix: ';'
   },
   python:{
     command: ['run', '--name', '', '-it', 'dpython', 'python']
@@ -24,7 +25,8 @@ var shellSettings = {
     command: ['run', '--name', '', '-it', 'dhaskell', 'ghci']
   },
   javascript:{
-    command: ['run', '--name', '', '-it', 'djs', 'js24']
+    command: ['run', '--name', '', '-it', 'djs', 'js24'],
+    suffix: ';'
   }
 };
 shellSettings.python2 = shellSettings.python;
@@ -114,6 +116,14 @@ function stop(env) {
   delete envs[env.id];
 }
 
+function send(command, env){
+  env.lastActive = new Date();
+  if(shellSettings[env.type].hasOwnProperty('suffix')){
+    command+=shellSettings[env.type].suffix;
+  }
+  env.env.stdin.write(command+'\n');
+}
+
 // Any kind of message
 bot.on('message', function (msg) {
   var chatId = msg.chat.id;
@@ -131,8 +141,7 @@ bot.on('message', function (msg) {
     stop(env);
   }
   else if(env) {
-    env.lastActive = new Date();
-    env.env.stdin.write(msg.text+'\n');
+    send(msg.text, env);
   }
   else {
     bot.sendMessage(msg.from.id, 'You don\'t have any env running. Run /start to start one, or /help to get help.');
