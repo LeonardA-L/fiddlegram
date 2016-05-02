@@ -19,6 +19,9 @@ var shellSettings = {
   },
   erlang:{
     command: ['run', '--name', '', '-it', 'derlang', 'erl']
+  },
+  haskell:{
+    command: ['run', '--name', '', '-it', 'dhaskell', 'ghci']
   }
 };
 shellSettings.python2 = shellSettings.python;
