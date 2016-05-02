@@ -18,11 +18,11 @@ npm install --no-bin-links
 curl -fsSL https://get.docker.com/ | sh
 sudo usermod -aG docker vagrant
 
-cd dockerImages/phpImage/
+cd /vagrant/dockerImages/phpImage/
 docker build -t dphp .
-cd dockerImages/pythonImage/
+cd /vagrant/dockerImages/pythonImage/
 docker build -t dpython .
-cd dockerImages/python3Image/
+cd /vagrant/dockerImages/python3Image/
 docker build -t dpython3 .
 
 cd /vagrant
