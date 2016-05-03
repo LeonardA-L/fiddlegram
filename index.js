@@ -156,6 +156,11 @@ function languages(id){
   bot.sendMessage(id, languages);
 }
 
+function version(id) {
+  bot.sendMessage(id,'Fiddlegram v1.0\n');
+  // TODO languages versions
+}
+
 // Any kind of message
 bot.on('message', function (msg) {
   var chatId = msg.chat.id;
@@ -177,6 +182,9 @@ bot.on('message', function (msg) {
   }
   else if(msg.text.indexOf('/lang') === 0){
     languages(msg.from.id);
+  }
+  else if(msg.text.indexOf('/v') === 0){
+    version(msg.from.id);
   }
   else {
     bot.sendMessage(msg.from.id, 'You don\'t have any env running. Run /start to start one, or /help to get help.');
