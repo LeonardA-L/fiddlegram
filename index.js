@@ -10,7 +10,8 @@ var token = require('./token').token;
 var shellSettings = {
   php:{
     command: ['run', '--name', '', '-it', 'dphp', 'php', '-a'],
-    suffix: ';'
+    suffix: ';',
+    shellLine: 'php >'
   },
   python:{
     command: ['run', '--name', '', '-it', 'dpython', 'python']
@@ -29,6 +30,12 @@ var shellSettings = {
     suffix: ';'
   }
 };
+
+var availableLanguages = '';
+for(var i in shellSettings){
+  availableLanguages += '- '+i+'\n';
+}
+
 shellSettings.python2 = shellSettings.python;
 shellSettings.js = shellSettings.javascript;
 
@@ -61,13 +68,28 @@ function killAndRemove(container, callback) {
   });
 }
 
+function respond(id, data){
+  var env = envs[id];
+  /*if(env.lastMessage === data.replace(/[^\x20-\x7E]+/g, '')){
+    return;
+  }*/
+  if(data === ''){
+    return;
+  }
+  /*
+  if(env.shellLine && data === env.shellLine){
+    return;
+  }*/
+  bot.sendMessage(id, data.toString());
+}
+
 function createEnv(id, type) {
   id = id.toString();
   var command = shellSettings[type].command.slice();
   command[2] = 'env'+id;
   var env = pty.spawn('docker', command);
   env.stdout.on('data', function (data) {
-      bot.sendMessage(id, data.toString());
+    respond(id, data.toString());
   });
 
   env.on('close', function (code) {
@@ -82,7 +104,8 @@ function createEnv(id, type) {
     env: env,
     started: new Date(),
     lastActive: new Date(),
-    pid: env.pid
+    pid: env.pid,
+    lastMessage:''
   };
 }
 
@@ -121,7 +144,13 @@ function send(command, env){
   if(shellSettings[env.type].hasOwnProperty('suffix')){
     command+=shellSettings[env.type].suffix;
   }
+  env.lastMessage = command.toString().replace(/[^\x20-\x7E]+/g, '');
   env.env.stdin.write(command+'\n');
+}
+
+function languages(id){
+  var languages = 'Available languages:\n'+availableLanguages+'Use /start [language] to start a new session.';
+  bot.sendMessage(id, languages);
 }
 
 // Any kind of message
@@ -142,6 +171,9 @@ bot.on('message', function (msg) {
   }
   else if(env) {
     send(msg.text, env);
+  }
+  else if(msg.text.indexOf('/lang') === 0){
+    languages(msg.from.id);
   }
   else {
     bot.sendMessage(msg.from.id, 'You don\'t have any env running. Run /start to start one, or /help to get help.');
