@@ -2,11 +2,10 @@ don't replay last message
 don't send shell line
 RAM limit
 CPU limit
-Ruby
 Scala
-/languages
 Faire un token.js de démo
 wording
+version
 
 docker: Error response from daemon: open /var/lib/docker/containers/7e7347594934076e44228f9674e1e019d05c242051198803ade87f1e00fefc4c/config.v2.json: no such file or directory.
 See 'docker run --help'.

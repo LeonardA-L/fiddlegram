@@ -28,6 +28,9 @@ var shellSettings = {
   javascript:{
     command: ['run', '--name', '', '-it', 'djs', 'js24'],
     suffix: ';'
+  },
+  ruby:{
+    command: ['run', '--name', '', '-it', 'druby', 'irb']
   }
 };
 
