@@ -24,5 +24,13 @@ cd /vagrant/dockerImages/pythonImage/
 docker build -t dpython .
 cd /vagrant/dockerImages/python3Image/
 docker build -t dpython3 .
+cd /vagrant/dockerImages/erlangImage/
+docker build -t derlang .
+cd /vagrant/dockerImages/javascriptImage/
+docker build -t djs .
+cd /vagrant/dockerImages/haskellImage/
+docker build -t dhaskell .
+cd /vagrant/dockerImages/rubyImage/
+docker build -t druby .
 
 cd /vagrant
