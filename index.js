@@ -11,13 +11,15 @@ var shellSettings = {
   php:{
     command: ['run', '--name', '', '-it', 'dphp', 'php', '-a'],
     suffix: ';',
-    shellLine: 'php >'
+    skipIntro: 'Interactive mode enabled'
   },
-  python:{
-    command: ['run', '--name', '', '-it', 'dpython', 'python']
+  python2:{
+    command: ['run', '--name', '', '-it', 'dpython', 'python'],
+    skipIntro: '[GCC 4.9.2] on linux2'
   },
   python3:{
-    command: ['run', '--name', '', '-it', 'dpython3', 'python3']
+    command: ['run', '--name', '', '-it', 'dpython3', 'python3'],
+    skipIntro: '[GCC 4.9.1] on linux'
   },
   erlang:{
     command: ['run', '--name', '', '-it', 'derlang', 'erl']
@@ -39,12 +41,12 @@ for(var i in shellSettings){
   availableLanguages += '- '+i+'\n';
 }
 
-shellSettings.python2 = shellSettings.python;
+shellSettings.python = shellSettings.python2;
 shellSettings.js = shellSettings.javascript;
 
 var killInactiveDelay = 20 * 1000; //ms
 var inactiveThreshold = 5 * 60;    //s
-var defaultLanguage = 'python';
+var defaultLanguage = 'php';
 var envs = {};
 
 // Create bot
@@ -73,17 +75,19 @@ function killAndRemove(container, callback) {
 
 function respond(id, data){
   var env = envs[id];
-  /*if(env.lastMessage === data.replace(/[^\x20-\x7E]+/g, '')){
-    return;
-  }*/
-  if(data === ''){
-    return;
+  var lines = data.split('\r\n');
+  var lmIdx = lines.indexOf(env.lastMessage);
+  if(lmIdx !== -1){
+    lines.splice(lmIdx, 1);
+  }
+  while(lines.indexOf(env.lastMessage) !== -1){
+    lines.splice(lines.indexOf(env.lastMessage), 1);
   }
   /*
   if(env.shellLine && data === env.shellLine){
     return;
   }*/
-  bot.sendMessage(id, data.toString());
+  bot.sendMessage(id, lines.join('\n'));
 }
 
 function createEnv(id, type) {
@@ -108,7 +112,7 @@ function createEnv(id, type) {
     started: new Date(),
     lastActive: new Date(),
     pid: env.pid,
-    lastMessage:''
+    lastMessage:shellSettings[type].skipIntro || ''
   };
 }
 
