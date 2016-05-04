@@ -46,7 +46,7 @@ shellSettings.js = shellSettings.javascript;
 
 var killInactiveDelay = 20 * 1000; //ms
 var inactiveThreshold = 5 * 60;    //s
-var defaultLanguage = 'php';
+var defaultLanguage = 'python';
 var envs = {};
 
 // Create bot
@@ -170,7 +170,15 @@ function version(id) {
   - Python3: 3.4.2\n\
   - Ruby: 2.1.5\n\
   Use /start [language] to start a new session.');
+}
 
+function help(id){
+  bot.sendMessage(id,'Fiddlegram launches an interactive language shell (REPL) in the language of your choosing, just like at home.\nUse the following commands to use the bot:\n\
+    /start - [language] start a new repl session\n\
+    /stop - stop current repl session\n\
+    /languages - list currently supported languages\n\
+    /version - list bot and languages versions\n\
+    /help - display this help');
 }
 
 // Any kind of message
@@ -198,6 +206,9 @@ bot.on('message', function (msg) {
   else if(msg.text.indexOf('/v') === 0){
     version(msg.from.id);
   }
+  else if(msg.text.indexOf('/h') === 0){
+    help(msg.from.id);
+  }
   else {
     bot.sendMessage(msg.from.id, 'You don\'t have any env running. Run /start to start one, or /help to get help.');
   }
@@ -223,5 +234,12 @@ setInterval(function(){
   }
 }, killInactiveDelay);
 
-killAndRemove();
-console.log('Bot is up and running');
+async.series([
+  function (next){
+    killAndRemove(null, next);
+  },
+  function (next){
+    console.log('Bot is up and running');
+    next();
+  }]
+);
