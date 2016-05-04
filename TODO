@@ -5,7 +5,6 @@ wording
 Erlang version
 description
 doc
-/help
 
 docker: Error response from daemon: open /var/lib/docker/containers/7e7347594934076e44228f9674e1e019d05c242051198803ade87f1e00fefc4c/config.v2.json: no such file or directory.
 See 'docker run --help'.
