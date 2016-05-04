@@ -161,8 +161,16 @@ function languages(id){
 }
 
 function version(id) {
-  bot.sendMessage(id,'Fiddlegram v1.0\n');
-  // TODO languages versions
+  bot.sendMessage(id,'Fiddlegram v1.0 with:\n\
+  - Erlang \n\
+  - Haskell: ghci 7.6.3\n\
+  - JavaScript: Spidermonkey C24.2.0\n\
+  - PHP: 5.6.20\n\
+  - Python2: 2.7.9\n\
+  - Python3: 3.4.2\n\
+  - Ruby: 2.1.5\n\
+  Use /start [language] to start a new session.');
+
 }
 
 // Any kind of message
