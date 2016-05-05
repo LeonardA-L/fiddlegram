@@ -4,34 +4,11 @@ var pty = require("pty");
 var async = require("async");
 var TelegramBot = require('node-telegram-bot-api');
 
+var config = require('./config');
 var token = require('./token').token;
 
 // Init stuff
-var shellSettings = {
-  php:{
-    command: ['run', '--name', '', '-it', 'dphp', 'php', '-a'],
-    suffix: ';',
-    skipIntro: 'Interactive mode enabled'
-  },
-  python2:{
-    command: ['run', '--name', '', '-it', 'dpython', 'python'],
-    skipIntro: '[GCC 4.9.2] on linux2'
-  },
-  python3:{
-    command: ['run', '--name', '', '-it', 'dpython3', 'python3'],
-    skipIntro: '[GCC 4.9.1] on linux'
-  },
-  erlang:{
-    command: ['run', '--name', '', '-it', 'derlang', 'erl']
-  },
-  javascript:{
-    command: ['run', '--name', '', '-it', 'djs', 'js24'],
-    suffix: ';'
-  },
-  ruby:{
-    command: ['run', '--name', '', '-it', 'druby', 'irb']
-  }
-};
+var shellSettings = config.shellSettings;
 
 var availableLanguages = '';
 for(var i in shellSettings){
@@ -41,9 +18,6 @@ for(var i in shellSettings){
 shellSettings.python = shellSettings.python2;
 shellSettings.js = shellSettings.javascript;
 
-var killInactiveDelay = 20 * 1000; //ms
-var inactiveThreshold = 5 * 60;    //s
-var defaultLanguage = 'python';
 var envs = {};
 
 // Create bot
@@ -116,7 +90,7 @@ function createEnv(id, type) {
 // Matches /echo [whatever]
 function start(msg) {
   console.log('Spawning');
-  var type = defaultLanguage;
+  var type = config.defaultLanguage;
 
   if(msg.text.split(' ').length > 1){
     type = msg.text.split(' ')[1].toLowerCase();
@@ -179,11 +153,8 @@ function help(id){
 
 // Any kind of message
 bot.on('message', function (msg) {
-  var chatId = msg.chat.id;
-  /*bot.sendMessage(msg.from.id, 'ok');
-  return;*/
   var env = envs[msg.from.id.toString()];
-  console.log(msg.text);
+  //console.log(msg.text);
   if(msg.text.match('/start\s?.*')) {
     if(env){
       return bot.sendMessage(msg.from.id, 'You already have a shell running. Run /stop to stop it.');
@@ -193,9 +164,6 @@ bot.on('message', function (msg) {
   else if(msg.text === '/stop') {
     stop(env);
   }
-  else if(env) {
-    send(msg.text, env);
-  }
   else if(msg.text.indexOf('/lang') === 0){
     languages(msg.from.id);
   }
@@ -204,6 +172,9 @@ bot.on('message', function (msg) {
   }
   else if(msg.text.indexOf('/h') === 0){
     help(msg.from.id);
+  }
+  else if(env) {
+    send(msg.text, env);
   }
   else {
     bot.sendMessage(msg.from.id, 'You don\'t have any env running. Run /start to start one, or /help to get help.');
@@ -222,13 +193,13 @@ setInterval(function(){
   for(var i in envs){
     var e = envs[i];
     var dateDiff = (now - e.lastActive) / 1000;
-    if(dateDiff > inactiveThreshold){
+    if(dateDiff > config.inactiveThreshold){
       //console.log('Killing inactive env '+i);
-      bot.sendMessage(i, 'Your console session has been inactive for '+inactiveThreshold/60+' minutes and has been killed');
+      bot.sendMessage(i, 'Your console session has been inactive for '+config.inactiveThreshold/60+' minutes and has been killed');
       stop(e);
     }
   }
-}, killInactiveDelay);
+}, config.killInactiveDelay);
 
 async.series([
   function (next){
