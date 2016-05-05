@@ -71,7 +71,7 @@ function createEnv(id, type) {
   });
 
   env.on('close', function (code) {
-    console.log('child process exited with code '+code);
+    console.log((new Date().toISOString())+' - session stopped. '+id);
     bot.sendMessage(id, 'Env killed');
     stop(env);
   });
@@ -89,7 +89,6 @@ function createEnv(id, type) {
 
 // Matches /echo [whatever]
 function start(msg) {
-  console.log('Spawning');
   var type = config.defaultLanguage;
 
   if(msg.text.split(' ').length > 1){
@@ -99,13 +98,14 @@ function start(msg) {
     }
   }
 
+  console.log((new Date().toISOString())+' - Spawning '+type+' - '+msg.from.id);
+
   async.series([
     function (next){
       killAndRemove('env'+msg.from.id.toString(), next);
     },
     function (next) {
       createEnv(msg.from.id, type);
-      bot.sendMessage(msg.from.id, 'Loaded up and looking fine');
       next();
     }
   ]);
@@ -188,13 +188,13 @@ bot.on('message', function (msg) {
 */
 
 setInterval(function(){
-  //console.log('Killing inactive envs');
+  //console.log((new Date().toISOString())+' - Killing inactive envs');
   var now = new Date();
   for(var i in envs){
     var e = envs[i];
     var dateDiff = (now - e.lastActive) / 1000;
     if(dateDiff > config.inactiveThreshold){
-      //console.log('Killing inactive env '+i);
+      console.log((new Date().toISOString())+' - Killing inactive env '+i);
       bot.sendMessage(i, 'Your console session has been inactive for '+config.inactiveThreshold/60+' minutes and has been killed');
       stop(e);
     }
@@ -206,7 +206,7 @@ async.series([
     killAndRemove(null, next);
   },
   function (next){
-    console.log('Bot is up and running');
+    console.log((new Date().toISOString())+' - Bot is up and running');
     next();
   }]
 );
