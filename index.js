@@ -75,7 +75,7 @@ function createEnv(id, type) {
 
   env.on('close', function (/*code*/) {
     console.log((new Date().toISOString())+' - session stopped. '+id);
-    bot.sendMessage(id, 'Env killed');
+    bot.sendMessage(id, 'Your session stopped.');
     stop(env);
   });
 
@@ -146,11 +146,12 @@ function version(id) {
 
 function help(id){
   bot.sendMessage(id,'FiddleGram launches an interactive language shell (REPL) in the language of your choosing, just like at home.\nUse the following commands to use the bot:\n\
-    /start - [language] start a new repl session\n\
+    /start - [language] start a new repl session. Default python2\n\
     /stop - stop current repl session\n\
     /languages - list currently supported languages\n\
     /version - list bot and languages versions\n\
-    /help - display this help');
+    /help - display this help\n\n\
+    Make your own FiddleGram bot at https://github.com/LeonardA-L/fiddlegram');
 }
 
 // Any kind of message
@@ -159,7 +160,7 @@ bot.on('message', function (msg) {
   //console.log(msg.text);
   if(msg.text.match('/start\s?.*')) {
     if(env){
-      return bot.sendMessage(msg.from.id, 'You already have a shell running. Run /stop to stop it.');
+      return bot.sendMessage(msg.from.id, 'You already have a'+env.type+' session running. Run /stop to stop it.');
     }
     start(msg);
   }

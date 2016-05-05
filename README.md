@@ -1,10 +1,10 @@
-# FiddleGram
+# [FiddleGram](https://telegram.me/FiddleBot)
 
-FiddleGram is a Telegram bot who launches an interactive language shell (REPL) in the language of your choosing, just like at home.
+[FiddleGram](https://telegram.me/FiddleBot) is a Telegram bot who launches an interactive language shell (REPL) in the language of your choosing, just like at home.
 
 ----
 
-[Go ahead and try it!](If you see this it means I haven't put the link in. Sorry.)
+[Go ahead and try it!](https://telegram.me/FiddleBot)
 You want a python3 console? Just run `/start python3`!
 
 ## Usage
