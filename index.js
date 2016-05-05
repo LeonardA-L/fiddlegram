@@ -1,7 +1,8 @@
-// Module required
-var child_process = require("child_process");
-var pty = require("pty");
-var async = require("async");
+'use strict';
+// Modules required
+var child_process = require('child_process');
+var pty = require('pty');
+var async = require('async');
 var TelegramBot = require('node-telegram-bot-api');
 
 var config = require('./config');
@@ -12,7 +13,9 @@ var shellSettings = config.shellSettings;
 
 var availableLanguages = '';
 for(var i in shellSettings){
-  availableLanguages += '- '+i+'\n';
+  if(shellSettings.hasOwnProperty(i)){
+    availableLanguages += '- '+i+'\n';
+  }
 }
 
 shellSettings.python = shellSettings.python2;
@@ -46,18 +49,18 @@ function killAndRemove(container, callback) {
 
 function respond(id, data){
   var env = envs[id];
-  var lines = data.split('\r\n');
+  data = data.split('\r').join('');
+  var lines = data.split('\n');
   var lmIdx = lines.indexOf(env.lastMessage);
   if(lmIdx !== -1){
     lines.splice(lmIdx, 1);
   }
-  while(lines.indexOf(env.lastMessage) !== -1){
-    lines.splice(lines.indexOf(env.lastMessage), 1);
+  while(lines.indexOf('') !== -1){
+    lines.splice(lines.indexOf(''), 1);
   }
-  /*
-  if(env.shellLine && data === env.shellLine){
+  if(!lines.length){
     return;
-  }*/
+  }
   bot.sendMessage(id, lines.join('\n'));
 }
 
@@ -70,7 +73,7 @@ function createEnv(id, type) {
     respond(id, data.toString());
   });
 
-  env.on('close', function (code) {
+  env.on('close', function (/*code*/) {
     console.log((new Date().toISOString())+' - session stopped. '+id);
     bot.sendMessage(id, 'Env killed');
     stop(env);
@@ -87,7 +90,6 @@ function createEnv(id, type) {
   };
 }
 
-// Matches /echo [whatever]
 function start(msg) {
   var type = config.defaultLanguage;
 
@@ -110,7 +112,7 @@ function start(msg) {
     }
   ]);
 
-};
+}
 
 function stop(env) {
   killAndRemove('env'+env.id);
@@ -122,7 +124,7 @@ function send(command, env){
   if(shellSettings[env.type].hasOwnProperty('suffix')){
     command+=shellSettings[env.type].suffix;
   }
-  env.lastMessage = command.toString().replace(/[^\x20-\x7E]+/g, '');
+  env.lastMessage = command.toString();
   env.env.stdin.write(command+'\n');
 }
 
@@ -132,7 +134,7 @@ function languages(id){
 }
 
 function version(id) {
-  bot.sendMessage(id,'Fiddlegram v1.0 with:\n\
+  bot.sendMessage(id,'FiddleGram v1.0 with:\n\
   - Erlang: 17.3\n\
   - JavaScript: Spidermonkey C24.2.0\n\
   - PHP: 5.6.20\n\
@@ -143,7 +145,7 @@ function version(id) {
 }
 
 function help(id){
-  bot.sendMessage(id,'Fiddlegram launches an interactive language shell (REPL) in the language of your choosing, just like at home.\nUse the following commands to use the bot:\n\
+  bot.sendMessage(id,'FiddleGram launches an interactive language shell (REPL) in the language of your choosing, just like at home.\nUse the following commands to use the bot:\n\
     /start - [language] start a new repl session\n\
     /stop - stop current repl session\n\
     /languages - list currently supported languages\n\
@@ -181,22 +183,18 @@ bot.on('message', function (msg) {
   }
 });
 
-/*bot.on('inline_query', function (msg) {
-	console.log(msg);
-	bot.answerInlineQuery(msg.id, [{type:'text', text:'haha'}]);
-});
-*/
-
 setInterval(function(){
   //console.log((new Date().toISOString())+' - Killing inactive envs');
   var now = new Date();
   for(var i in envs){
-    var e = envs[i];
-    var dateDiff = (now - e.lastActive) / 1000;
-    if(dateDiff > config.inactiveThreshold){
-      console.log((new Date().toISOString())+' - Killing inactive env '+i);
-      bot.sendMessage(i, 'Your console session has been inactive for '+config.inactiveThreshold/60+' minutes and has been killed');
-      stop(e);
+    if(envs.hasOwnProperty(i)){
+      var e = envs[i];
+      var dateDiff = (now - e.lastActive) / 1000;
+      if(dateDiff > config.inactiveThreshold){
+        console.log((new Date().toISOString())+' - Killing inactive env '+i);
+        bot.sendMessage(i, 'Your console session has been inactive for '+config.inactiveThreshold/60+' minutes and has been killed');
+        stop(e);
+      }
     }
   }
 }, config.killInactiveDelay);

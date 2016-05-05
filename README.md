@@ -50,3 +50,5 @@ In order to avoid too many inactive instances running and overloading the server
 ## License
 
 MIT, [here](LICENSE)
+
+Made with love and the [node telegram bot api](https://github.com/yagop/node-telegram-bot-api)
