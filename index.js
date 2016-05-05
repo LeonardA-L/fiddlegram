@@ -159,7 +159,7 @@ function languages(id){
 
 function version(id) {
   bot.sendMessage(id,'Fiddlegram v1.0 with:\n\
-  - Erlang \n\
+  - Erlang: 17.3\n\
   - JavaScript: Spidermonkey C24.2.0\n\
   - PHP: 5.6.20\n\
   - Python2: 2.7.9\n\
