@@ -46,3 +46,7 @@ docker build -t dmyLanguage .
 Then go to [index.js](index.js) and add the language in the `shellSettings` object. It's mostly copy-pasting.
 
 In order to avoid too many inactive instances running and overloading the server, FiddleGram kills inactive sessions after **5 minutes**. You can change this by changing the `inactiveThreshold` variable.
+
+## License
+
+MIT, [here](LICENSE)
