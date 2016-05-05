@@ -1,0 +1,24 @@
+{
+  "name": "fiddlegram",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LeonardA-L/fiddlegram.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LeonardA-L/fiddlegram/issues"
+  },
+  "homepage": "https://github.com/LeonardA-L/fiddlegram#readme",
+  "dependencies": {
+    "async": "^2.0.0-rc.3",
+    "node-telegram-bot-api": "^0.21.1",
+    "pty": "0.0.0"
+  }
+}
