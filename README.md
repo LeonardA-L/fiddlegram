@@ -25,12 +25,12 @@ Once a session is started, every message will be forwarded to the REPL.
 If you want your own FiddleGram bot on your very own server, here's what you have to do:
 * First, get a server, preferably Ubuntu
 * `git clone` this repo onto the server
-* Run the [provisionning script](vagrant_provision.sh)
-* If that didn't work out, well you gonna have to troubleshoot it yourself but it's pretty simple. Everything is relative to a /vagrant folder since the development environment uses vagrant.
+* Run the [provisionning script](provision.sh). Attention: You have to logout at some point (cf script)
+* If that didn't work out, well you gonna have to troubleshoot it yourself but it's pretty simple.
 * Then go to the [BotFather](https://telegram.me/botfather) and create your very own Telegram bot. [Here](Botfather_config.md)'s a more detailed set of instructions on what to do.
 * Put the provided token into the [token.js](token.js) file
 * Run `node index.js` to run your server. Daemonize it, nohup it, & it, do as you wish
-* Your FiddleGram is up and running
+* Your FiddleGram is up and running! Reward yourself with a pat on the back
 
 ## Tinkering
 
@@ -38,10 +38,9 @@ What FiddleGram does when receiving a `/start` command, is to instantiate a Dock
 
 Once your Dockerfile is complete, you can run
 ```bash
-cd /vagrant/dockerImages/myImage/
+cd dockerImages/myImage/
 docker build -t dmyLanguage .
 ```
-(Again, replace vagrant with the root of your repo)
 
 Then go to [index.js](index.js) and add the language in the `shellSettings` object. It's mostly copy-pasting.
 
