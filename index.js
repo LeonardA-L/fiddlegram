@@ -158,6 +158,9 @@ function help(id){
 bot.on('message', function (msg) {
   var env = envs[msg.from.id.toString()];
   //console.log(msg.text);
+  if(!msg.text){
+    return;
+  }
   if(msg.text.match('/start\s?.*')) {
     if(env){
       return bot.sendMessage(msg.from.id, 'You already have a'+env.type+' session running. Run /stop to stop it.');
